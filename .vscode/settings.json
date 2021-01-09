@@ -1,0 +1,12 @@
+{
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.linting.pylintUseMinimalCheckers": false,
+    "python.linting.pylintArgs": [
+    "--load-plugins",
+    "pylint_flask_sqlalchemy, pylint_flask",
+    "--init-hook",
+    "import sys; sys.path.insert(0, '/Users/mayoolojo/VisualStudioCodes/csc-backend')"
+    ],
+    "python.pythonPath": "/Users/mayoolojo/VisualStudioCodes/csc-backend/env/bin/python3.9"
+}
