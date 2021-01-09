@@ -6,7 +6,10 @@
    For mac users: `. env/bin/activate`
 3. Install the libraries needed for the application: `pip install -r requirements.txt`
    Sometimes `pip3 install -r requirements.txt`
+4. Run `python3 app.py`
 
 # Running the Application
 
-1.
+1. Activate the environment: `env/Scripts/activate`
+   For mac users: `. env/bin/activate`
+2. Run `python3 app.py`
