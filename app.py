@@ -6,7 +6,7 @@ from flask import render_template
 from flask import request
 
 from flask_sqlalchemy import SQLAlchemy
-""" from models import Event, Pillar, User """
+from models import Event, Pillar
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 DATABASE_FILE = "sqlite:///{}".format(
@@ -37,17 +37,31 @@ def handle_create_event_form():
     This page send the data using a form.
     """
     if request.method == 'POST':
-        pillar = request.form.get('pillar')
         name = request.form.get('name')
+        pillar = request.form.get('pillar')
         date = request.form.get('name')
         description = request.form.get('description')
         link = request.form.get('link')
+
+        pillar_exists = db.session.query(Pillar).filter_by(
+            name=pillar).first()  # TODO: fix error
 
         if name is None or name == "":
             return render_template("/create-event.html", error="Please enter an event name")
         elif date is None or date == "":
             return render_template("/create-event.html", error="Please enter a date")
-    return render_template("/")
+        elif (pillar is not None or pillar != "") and pillar_exists is None:
+            return render_template("/create-event.html", error="Please enter a valid Pillar name")
+
+        event_id = ''  # TODO: generate an id
+        pillar_id = ''  # TODO: get Pillar id
+
+        event_object = Event(id=event_id, name=name, pillar=pillar_id,
+                             date=date, description=description, link=link)
+        db.session.add(event_object)
+        db.session.commit()
+
+    return render_template("/create-event", error="Event Created")
 
 
 if __name__ == "__main__":
