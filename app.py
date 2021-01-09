@@ -1,5 +1,4 @@
 """ proper file """
-from models import *
 import os
 
 from flask import Flask
@@ -7,6 +6,7 @@ from flask import render_template
 from flask import request
 
 from flask_sqlalchemy import SQLAlchemy
+from models import Event, Pillar, User
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 DATABASE_FILE = "sqlite:///{}".format(
