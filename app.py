@@ -6,7 +6,7 @@ from flask import render_template
 from flask import request
 
 from flask_sqlalchemy import SQLAlchemy
-from models import Event, Pillar
+import models
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 DATABASE_FILE = "sqlite:///{}".format(
@@ -43,21 +43,20 @@ def handle_create_event_form():
         description = request.form.get('description')
         link = request.form.get('link')
 
-        pillar_exists = db.session.query(Pillar).filter_by(
-            name=pillar).first()  # TODO: fix error
+        pillar = db.session.query(models.Pillar).filter_by(
+            name=pillar).first()
 
         if name is None or name == "":
             return render_template("/create-event.html", error="Please enter an event name")
         elif date is None or date == "":
             return render_template("/create-event.html", error="Please enter a date")
-        elif (pillar is not None or pillar != "") and pillar_exists is None:
+        elif (pillar is not None or pillar != "") and pillar is None:
             return render_template("/create-event.html", error="Please enter a valid Pillar name")
 
-        event_id = ''  # TODO: generate an id
-        pillar_id = ''  # TODO: get Pillar id
+        pillar_id = pillar.id
 
-        event_object = Event(id=event_id, name=name, pillar=pillar_id,
-                             date=date, description=description, link=link)
+        event_object = models.Event(name=name, pillar=pillar_id,
+                                    date=date, description=description, link=link)
         db.session.add(event_object)
         db.session.commit()
 
