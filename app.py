@@ -4,6 +4,7 @@ import os
 from flask import Flask
 from flask import render_template
 from flask import request
+from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
 import models
@@ -38,29 +39,31 @@ def handle_create_event_form():
     """
     if request.method == 'POST':
         name = request.form.get('name')
-        pillar = request.form.get('pillar')
-        date = request.form.get('name')
+        pillar_name = request.form.get('pillar')
+        date = request.form.get('date')
         description = request.form.get('description')
         link = request.form.get('link')
 
         pillar = db.session.query(models.Pillar).filter_by(
-            name=pillar).first()
+            name=pillar_name).first()
 
         if name is None or name == "":
             return render_template("/create-event.html", error="Please enter an event name")
         elif date is None or date == "":
             return render_template("/create-event.html", error="Please enter a date")
-        elif (pillar is not None or pillar != "") and pillar is None:
+        elif (pillar_name is not None or pillar_name != "") and pillar is None:
             return render_template("/create-event.html", error="Please enter a valid Pillar name")
 
-        pillar_id = pillar.id
+        pillar_id = pillar.id if pillar != None else None
+        date_object = datetime.strptime(date, '%Y-%m-%dT%H:%M')
 
         event_object = models.Event(name=name, pillar=pillar_id,
-                                    date=date, description=description, link=link)
+                                    date=date_object, description=description, link=link)
         db.session.add(event_object)
         db.session.commit()
+        all_the_events = db.session.query(models.Event).all()
 
-    return render_template("/create-event", error="Event Created")
+    return render_template("/create-event.html", error="Event Created")
 
 
 if __name__ == "__main__":
