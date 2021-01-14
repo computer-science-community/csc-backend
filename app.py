@@ -62,9 +62,16 @@ def handle_create_event_form():
                                     date=date_object, description=description, link=link)
         db.session.add(event_object)
         db.session.commit()
-        all_the_events = db.session.query(models.Event).all()
+        # all_the_events = db.session.query(models.Event).all()
 
     return render_template("/create-event.html", error="Event Created")
+
+
+@app.route("/modify-event", methods=["GET", "POST"])
+def modify_page():
+    """ loads modify page with all existing events in dropdown """
+    option_list = models.Event.query.all()
+    return render_template("modify-event.html", option_list=option_list)
 
 
 if __name__ == "__main__":
