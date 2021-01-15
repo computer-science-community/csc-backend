@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <style>
 body {font-family: Arial, Helvetica, sans-serif;}
 * {box-sizing: border-box;}
@@ -39,33 +40,58 @@ input[type=submit]:hover {
 </head>
 <body>
 
+    <script>
+        function populate_form(){
+            const e = document.getElementById("event_list");
+            console.log("entered populate_form")
+            if (e) {
+                event_id = document.getElementById("event_id").value = e.value;
+                $(document).ready(function(){
+                    $.ajax({
+                        url: '/gather_event_info',
+                        type: 'POST',
+                        data: { 'event_id': event_id },
+                        success: function(data){
+                            document.getElementById("event_id").value = data[0];
+                            document.getElementById("pillar").value = data[1];
+                            document.getElementById("name").value = data[2];
+                        }
+                    });
+                });
+            }
+
+        }
+    </script>
+
 <h3>Modify an Event</h3>
 
 <div class="container">
   <form action="/create-event-form" method="POST" name="readonly-form">
     {{error}}
     <div class="form-group">
-      <select type="select" id="event_list" name="event_list">
+      <select type="select" id="event_list" name="event_list" onchange="populate_form()">
         {% for o in option_list %}
-            <option value="{{ o.name }}" SELECTED>{{ o.name }}</option>
+            <option id="obj" value="{{ o.id }}" SELECTED>{{ o.name, o.id }}</option>
         {% endfor %}
       </select>
+      <label for="event_id">Event Id</label>
+      <input type="text" id="event_id" name="event_id" placeholder="No Event" readonly>
 
       <label for="pillar">Pillar:</label>
-      <input type="text" id="pillar" name="pillar" placeholder="ex: Exam Review">
+      <input type="text" id="pillar" name="pillar" placeholder="No Event">
 
       <label for="name">Event Name:</label>
-      <input type="text" id="name" name="name" placeholder="ex: CS1 Midterm Review">
+      <input type="text" id="name" name="name" placeholder="No Event">
 
       <label for="date">Date:</label>
-      <input type="datetime-local" id="date" name="date" placeholder="YYYY-MM-DD HH:MM:SS">
+      <input type="datetime-local" id="date" name="date" placeholder="No Event">
     </br>
   </br>
       <label for="description">Description</label>
-      <textarea id="description" name="description" placeholder="ex: Midterm Review in Atrium. Free pizza will be provided" style="height:100px"></textarea>
+      <textarea id="description" name="description" placeholder="No Event" style="height:100px"></textarea>
 
       <label for="link">Campus Groups link:</label>
-      <input type="text" id="link" name="link" placeholder="Create event on campus groups to recieve link">
+      <input type="text" id="link" name="link" placeholder="No Event">
     </div>
     <button type="submit">Create Event</button>
   </form>

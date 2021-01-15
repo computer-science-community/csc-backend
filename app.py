@@ -5,6 +5,7 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from datetime import datetime
+from flask import jsonify
 
 from flask_sqlalchemy import SQLAlchemy
 import models
@@ -70,8 +71,16 @@ def handle_create_event_form():
 @app.route("/modify-event", methods=["GET", "POST"])
 def modify_page():
     """ loads modify page with all existing events in dropdown """
-    option_list = models.Event.query.all()
+    option_list = models.Pillar.query.all()
     return render_template("modify-event.html", option_list=option_list)
+
+
+@app.route("/gather_event_info", methods=["GET", "POST"])
+def gather_info():
+    if request.method == 'POST':
+        event_id = request.values.get('event_id')
+        e_obj = db.session.query(models.Pillar).filter_by(id=event_id).first()
+        return jsonify([e_obj.id, e_obj.name, e_obj.email])
 
 
 if __name__ == "__main__":
