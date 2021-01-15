@@ -20,6 +20,7 @@ class Pillar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(200), nullable=False)
+
     def __repr__(self):
         return "<Pillar: id={}, name={}, email={}>".format(self.id, self.name, self.email)
 
@@ -28,5 +29,9 @@ class User(db.Model):
     """ user info """
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(200), unique=True,  nullable=False)
-    password = db.Column(db.Text, nullable=False)
-    email = db.Column(db.String(200), nullable=False)
+    password = db.Column(db.LargeBinary, nullable=False)
+    salt = db.Column(db.LargeBinary, nullable=False)
+    email = db.Column(db.String(200))
+
+    def __repr__(self):
+        return "<User: id={}, username={}, email={}>".format(self.id, self.username, self.email)
