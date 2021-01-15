@@ -22,8 +22,20 @@ db = SQLAlchemy(app)
 
 @app.route("/")
 def home():
-    """ more words """
-    return "My flask app"
+    """ Renders login if the user is not logged in """
+    return render_template("login.html")
+
+
+@app.route("/handle-login", methods=["GET", "POST"])
+def handle_login_form():
+    """ Handles receiving login information """
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        return username + password
+
+    else:
+        return "Method Not Allowed"
 
 
 @app.route("/create-event", methods=["GET", "POST"])
@@ -64,7 +76,8 @@ def handle_create_event_form():
         db.session.commit()
         all_the_events = db.session.query(models.Event).all()
 
-    return render_template("/create-event.html", error="Event Created")
+        return render_template("/create-event.html", error="Event Created")
+    return "Method Not Allowed"
 
 
 if __name__ == "__main__":
