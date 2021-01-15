@@ -55,6 +55,9 @@ input[type=submit]:hover {
                             document.getElementById("event_id").value = data[0];
                             document.getElementById("pillar").value = data[1];
                             document.getElementById("name").value = data[2];
+                            document.getElementById("date").value = data[3];
+                            document.getElementById("description").value = data[4];
+                            document.getElementById("link").value = data[5];
                         }
                     });
                 });
@@ -70,28 +73,29 @@ input[type=submit]:hover {
     {{error}}
     <div class="form-group">
       <select type="select" id="event_list" name="event_list" onchange="populate_form()">
+        <option> new event</option>
         {% for o in option_list %}
-            <option id="obj" value="{{ o.id }}" SELECTED>{{ o.name, o.id }}</option>
+            <option id="obj" value="{{ o.id }}">{{ o.name, o.id }}</option>
         {% endfor %}
       </select>
       <label for="event_id">Event Id</label>
-      <input type="text" id="event_id" name="event_id" placeholder="No Event" readonly>
+      <input type="text" id="event_id" name="event_id" placeholder="No Id Yet" readonly>
 
       <label for="pillar">Pillar:</label>
-      <input type="text" id="pillar" name="pillar" placeholder="No Event">
+      <input type="text" id="pillar" name="pillar">
 
       <label for="name">Event Name:</label>
-      <input type="text" id="name" name="name" placeholder="No Event">
+      <input type="text" id="name" name="name" placeholder="New Event">
 
       <label for="date">Date:</label>
-      <input type="datetime-local" id="date" name="date" placeholder="No Event">
+      <input type="datetime-local" id="date" name="date">
     </br>
   </br>
       <label for="description">Description</label>
-      <textarea id="description" name="description" placeholder="No Event" style="height:100px"></textarea>
+      <textarea id="description" name="description" style="height:100px"></textarea>
 
       <label for="link">Campus Groups link:</label>
-      <input type="text" id="link" name="link" placeholder="No Event">
+      <input type="text" id="link" name="link" >
     </div>
     <button type="submit">Create Event</button>
   </form>

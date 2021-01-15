@@ -71,7 +71,7 @@ def handle_create_event_form():
 @app.route("/modify-event", methods=["GET", "POST"])
 def modify_page():
     """ loads modify page with all existing events in dropdown """
-    option_list = models.Pillar.query.all()
+    option_list = models.Event.query.all()
     return render_template("modify-event.html", option_list=option_list)
 
 
@@ -79,8 +79,10 @@ def modify_page():
 def gather_info():
     if request.method == 'POST':
         event_id = request.values.get('event_id')
-        e_obj = db.session.query(models.Pillar).filter_by(id=event_id).first()
-        return jsonify([e_obj.id, e_obj.name, e_obj.email])
+        e_obj = db.session.query(models.Event).filter_by(id=event_id).first()
+        pillar_info = db.session.query(
+            models.Pillar).filter_by(id=e_obj.pillar).first()
+        return jsonify([e_obj.id, pillar_info.name, e_obj.name, None, e_obj.description, e_obj.link])
 
 
 if __name__ == "__main__":
