@@ -8,8 +8,10 @@ from flask_login import LoginManager, login_user, login_required, logout_user
 from datetime import datetime
 from urllib.parse import urlparse, urljoin
 from flask_sqlalchemy import SQLAlchemy
+from email.message import EmailMessage
 import hashlib
 import models
+import smtplib
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 DATABASE_FILE = "sqlite:///{}".format(
@@ -128,6 +130,27 @@ def handle_create_event_form():
 
         return render_template("/create-event.html", error="Event Created")
     return "Method Not Allowed"
+
+
+@app.route('/handle-email', methods=["POST"])
+def handle_contact_us_form():
+    if request.method == 'POST':
+        from_email = request.form.get('emailfrom')
+        email_to = request.form.get('emailto')
+        subject = request.form.get('emailsubject')
+        body = request.form.get('emailbody')
+
+        if not (from_email and email_to and subject and body):
+            return "All fields are required"
+
+        email = EmailMessage()
+        email['Subject'] = subject
+        email['From'] = from_email
+        email['To'] = email_to
+
+        # TODO: Change this to use RIT's SMTP server. Need account and authentication
+        with smtplib.SMTP('localhost') as s:
+            s.send_message(email)
 
 
 if __name__ == "__main__":
