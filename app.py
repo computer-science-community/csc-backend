@@ -7,7 +7,6 @@ from flask import request, redirect
 from flask_login import LoginManager, login_user, login_required, logout_user
 from datetime import datetime
 from urllib.parse import urlparse, urljoin
-
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
 import models
@@ -27,8 +26,9 @@ login_manager.init_app(app)
 
 
 @app.route("/")
+@app.route("/login")
 def home():
-    """ Renders login if the user is not logged in """
+    """ Renders login page"""
     return render_template("login.html")
 
 
@@ -66,10 +66,12 @@ def handle_login_form():
 
 @login_manager.user_loader
 def load_user(user_id):
+    """ Required for flask-login """
     return db.session.query(models.User).filter_by(id=int(user_id)).first()
 
 
 def is_safe_url(target):
+    """ Makes sure users aren't doing evil things """
     ref_url = urlparse(request.host_url)
     test_url = urlparse(urljoin(request.host_url, target))
     return test_url.scheme in ('http', 'https') and \
@@ -79,6 +81,7 @@ def is_safe_url(target):
 @app.route("/logout")
 @login_required
 def logout():
+    """ Log out a user and crear their cookies """
     logout_user()
     return redirect("/")
 
@@ -86,7 +89,7 @@ def logout():
 @app.route("/create-event", methods=["GET", "POST"])
 @login_required
 def event_page():
-    """ view event-page html """
+    """ Renders page to create an event """
     return render_template("create-event.html")
 
 
@@ -95,7 +98,7 @@ def event_page():
 def handle_create_event_form():
     """
     This endpoint is accessed from the create-event page.
-    This page send the data using a form.
+    This page sends the data using a form.
     """
     if request.method == 'POST':
         name = request.form.get('name')

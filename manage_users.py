@@ -32,10 +32,10 @@ def add_user():
         else:
             print("Passwords don't match. Try again")
 
+    # Hash the password and store the username, hash, and salt
     salt = os.urandom(32)
     hashed_password = hashlib.pbkdf2_hmac(
         'sha256', password.encode('utf-8'), salt, 100000)
-
     user = models.User(username=username,
                        password=hashed_password, salt=salt)
     app.db.session.add(user)
