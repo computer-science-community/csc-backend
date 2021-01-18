@@ -7,6 +7,7 @@ from flask import request
 from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
+import hashlib
 import models
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
@@ -32,6 +33,22 @@ def handle_login_form():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+
+        user = db.session.query(models.User).filter_by(
+            username=username).first()
+
+        if not user:
+            return render_template("login.html", error="Invalid credentials")
+        else:
+            stored_password = user.password
+            salt = user.salt
+
+        new_key = hashlib.pbkdf2_hmac(
+            'sha256', password.encode('utf-8'), salt, 100000)
+        if stored_password == new_key:
+            return render_template("create-event.html")
+        else:
+            return render_template("login.html", error="Invalid credentials")
         return username + password
 
     else:
