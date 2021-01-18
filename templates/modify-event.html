@@ -75,7 +75,7 @@ input[type=submit]:hover {
       <select type="select" id="event_list" name="event_list" onchange="populate_form()">
         <option> new event</option>
         {% for o in option_list %}
-            <option id="obj" value="{{ o.id }}">{{ o.name, o.id }}</option>
+            <option id="obj" value="{{ o.id }}">{{ o.name, o.date }}</option>
         {% endfor %}
       </select>
       <label for="event_id">Event Id</label>
