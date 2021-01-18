@@ -3,8 +3,10 @@ import os
 
 from flask import Flask
 from flask import render_template
-from flask import request
+from flask import request, redirect
+from flask_login import LoginManager, login_user, login_required, logout_user
 from datetime import datetime
+from urllib.parse import urlparse, urljoin
 
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
@@ -15,10 +17,13 @@ DATABASE_FILE = "sqlite:///{}".format(
     os.path.join(project_dir, "eventsdatabase.db"))
 
 app = Flask(__name__)
+app.secret_key = os.urandom(16)
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_FILE
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
 @app.route("/")
@@ -46,6 +51,10 @@ def handle_login_form():
         new_key = hashlib.pbkdf2_hmac(
             'sha256', password.encode('utf-8'), salt, 100000)
         if stored_password == new_key:
+            login_user(user)
+            next = request.args.get('next')
+            if not is_safe_url(next):
+                return flask.abort(400)
             return render_template("create-event.html")
         else:
             return render_template("login.html", error="Invalid credentials")
@@ -55,13 +64,34 @@ def handle_login_form():
         return "Method Not Allowed"
 
 
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.query(models.User).filter_by(id=int(user_id)).first()
+
+
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and \
+        ref_url.netloc == test_url.netloc
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
+
+
 @app.route("/create-event", methods=["GET", "POST"])
+@login_required
 def event_page():
     """ view event-page html """
     return render_template("create-event.html")
 
 
 @app.route('/create-event-form', methods=["POST"])
+@login_required
 def handle_create_event_form():
     """
     This endpoint is accessed from the create-event page.

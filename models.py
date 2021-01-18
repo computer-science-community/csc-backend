@@ -35,3 +35,15 @@ class User(db.Model):
 
     def __repr__(self):
         return "<User: id={}, username={}, email={}>".format(self.id, self.username, self.email)
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.id).encode("utf-8")
