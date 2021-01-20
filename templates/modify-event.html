@@ -41,10 +41,17 @@ input[type=submit]:hover {
 <body>
 
     <script>
-        function populate_form(){
+        function populate_form() {
             const e = document.getElementById("event_list");
-            console.log("entered populate_form")
-            if (e) {
+            if (e.value == "new event") {
+              document.getElementById("event_id").value = "";
+              document.getElementById("pillar").value = "";
+              document.getElementById("name").value = "";
+              document.getElementById("date").value = "";
+              document.getElementById("description").value = "";
+              document.getElementById("link").value = "";
+            }
+            else if (e) {
                 event_id = document.getElementById("event_id").value = e.value;
                 $(document).ready(function(){
                     $.ajax({
@@ -55,7 +62,9 @@ input[type=submit]:hover {
                             document.getElementById("event_id").value = data[0];
                             document.getElementById("pillar").value = data[1];
                             document.getElementById("name").value = data[2];
-                            document.getElementById("date").value = data[3];
+                            let sd = data[3].split(" ")
+                            let month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            document.getElementById("date").value = (sd[3] + '-' + String(month.indexOf(sd[2]) + 1).padStart(2, '0') + '-' + sd[1] + 'T' + sd[4])
                             document.getElementById("description").value = data[4];
                             document.getElementById("link").value = data[5];
                         }
@@ -69,35 +78,41 @@ input[type=submit]:hover {
 <h3>Modify an Event</h3>
 
 <div class="container">
-  <form action="/create-event-form" method="POST" name="readonly-form">
+  <form action="/event-form" method="POST" name="readonly-form">
     {{error}}
     <div class="form-group">
       <select type="select" id="event_list" name="event_list" onchange="populate_form()">
         <option> new event</option>
         {% for o in option_list %}
-            <option id="obj" value="{{ o.id }}">{{ o.name, o.date }}</option>
+            <option id="obj" value="{{ o.id }}">{{ o.name, o.date.strftime("%m/%d/%Y, %H:%M:%S") }}</option>
         {% endfor %}
       </select>
       <label for="event_id">Event Id</label>
       <input type="text" id="event_id" name="event_id" placeholder="No Id Yet" readonly>
 
       <label for="pillar">Pillar:</label>
-      <input type="text" id="pillar" name="pillar">
+      <input type="text" id="pillar" name="pillar" placeholder="ex: Exam Review">
 
       <label for="name">Event Name:</label>
-      <input type="text" id="name" name="name" placeholder="New Event">
+      <input type="text" id="name" name="name" placeholder="ex: CS1 Midterm Review">
 
       <label for="date">Date:</label>
       <input type="datetime-local" id="date" name="date">
+
     </br>
-  </br>
+    </br>
+
       <label for="description">Description</label>
-      <textarea id="description" name="description" style="height:100px"></textarea>
+      <textarea id="description" name="description" style="height:100px" placeholder="ex: Midterm Review in Atrium. Free pizza will be provided"></textarea>
 
       <label for="link">Campus Groups link:</label>
-      <input type="text" id="link" name="link" >
+      <input type="text" id="link" name="link" placeholder="Create event on campus groups to recieve link">
+
+      <input type="checkbox" id="delete" name="delete" value="delete">Delete</input>
+      <br></br>
+
     </div>
-    <button type="submit">Create Event</button>
+    <button type="submit">Submit</button>
   </form>
 </div>
 
