@@ -64,7 +64,7 @@ input[type=submit]:hover {
                             document.getElementById("name").value = data[2];
                             let sd = data[3].split(" ")
                             let month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                            document.getElementById("date").value = (sd[3] + '-' + String(month.indexOf(sd[2]) + 1).padStart(2, '0') + '-' + sd[1] + 'T' + sd[4])
+                            document.getElementById("date").value = (sd[3] + '-' + String(month.indexOf(sd[2]) + 1).padStart(2, '0') + '-' + sd[1] + 'T' + sd[4].substring(0, sd[4].length - 3));
                             document.getElementById("description").value = data[4];
                             document.getElementById("link").value = data[5];
                         }
@@ -73,6 +73,7 @@ input[type=submit]:hover {
             }
 
         }
+
     </script>
 
 <h3>Modify an Event</h3>
