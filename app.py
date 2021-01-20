@@ -27,48 +27,6 @@ def home():
     return "My flask app"
 
 
-@app.route("/create-event", methods=["GET", "POST"])
-def event_page():
-    """ view event-page html """
-    return render_template("create-event.html")
-
-
-@app.route('/create-event-form', methods=["POST"])
-def handle_create_event_form():
-    """
-    This endpoint is accessed from the create-event page.
-    This page send the data using a form.
-    """
-    if request.method == 'POST':
-        name = request.form.get('name')
-        pillar_name = request.form.get('pillar')
-        date = request.form.get('date')
-        description = request.form.get('description')
-        link = request.form.get('link')
-
-        pillar = db.session.query(models.Pillar).filter_by(
-            name=pillar_name).first()
-
-        if name is None or name == "":
-            return render_template("/create-event.html", error="Please enter an event name")
-        elif date is None or date == "":
-            return render_template("/create-event.html", error="Please enter a date")
-        elif (pillar_name != "") and pillar is None:
-            print("pillar name:" + pillar_name + ".")
-            return render_template("/create-event.html", error="Please enter a valid Pillar name")
-
-        pillar_id = pillar.id if pillar != None else None
-        date_object = datetime.strptime(date, '%Y-%m-%dT%H:%M')
-
-        event_object = models.Event(name=name, pillar=pillar_id,
-                                    date=date_object, description=description, link=link)
-        db.session.add(event_object)
-        db.session.commit()
-        # all_the_events = db.session.query(models.Event).all()
-
-    return render_template("/create-event.html", error="Event Created")
-
-
 @app.route("/modify-event", methods=["GET", "POST"])
 def modify_page():
     """ loads modify page with all existing events in dropdown """
