@@ -6,6 +6,8 @@ from flask import render_template
 from flask import request, redirect
 from flask_login import LoginManager, login_user, login_required, logout_user
 from datetime import datetime
+from flask import jsonify
+
 from urllib.parse import urlparse, urljoin
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
@@ -55,7 +57,7 @@ def handle_login_form():
             next = request.args.get('next')
             if not is_safe_url(next):
                 return flask.abort(400)
-            return render_template("create-event.html")
+            return render_template("modify-event.html")
         else:
             return render_template("login.html", error="Invalid credentials")
         return username + password
@@ -86,19 +88,34 @@ def logout():
     return redirect("/")
 
 
-@app.route("/create-event", methods=["GET", "POST"])
+@app.route("/modify-event", methods=["GET", "POST"])
 @login_required
-def event_page():
-    """ Renders page to create an event """
-    return render_template("create-event.html")
+def modify_page():
+    """ loads modify page with all existing events in dropdown """
+    option_list = models.Event.query.all()
+    return render_template("modify-event.html", option_list=option_list)
 
 
-@app.route('/create-event-form', methods=["POST"])
+@app.route("/gather_event_info", methods=["GET", "POST"])
 @login_required
-def handle_create_event_form():
+def gather_info():
+    if request.method == 'POST':
+        event_id = request.values.get('event_id')
+        e_obj = db.session.query(models.Event).filter_by(id=event_id).first()
+        pillar_info = db.session.query(
+            models.Pillar).filter_by(id=e_obj.pillar).first()
+        if pillar_info is None:
+            pillar_name = ""
+        else:
+            pillar_name = pillar_info.name
+        return jsonify([e_obj.id, pillar_name, e_obj.name, e_obj.date, e_obj.description, e_obj.link])
+
+
+@app.route("/event-form", methods=["GET", "POST"])
+@login_required
+def event_form():
     """
-    This endpoint is accessed from the create-event page.
-    This page sends the data using a form.
+    this end point creates, modifies, and deltetes an event
     """
     if request.method == 'POST':
         name = request.form.get('name')
@@ -106,27 +123,59 @@ def handle_create_event_form():
         date = request.form.get('date')
         description = request.form.get('description')
         link = request.form.get('link')
+        delete = request.form.get('delete')
+        event_id = request.values.get('event_id')
+        option_list = models.Event.query.all()
 
         pillar = db.session.query(models.Pillar).filter_by(
             name=pillar_name).first()
 
-        if name is None or name == "":
-            return render_template("/create-event.html", error="Please enter an event name")
-        elif date is None or date == "":
-            return render_template("/create-event.html", error="Please enter a date")
-        elif (pillar_name is not None or pillar_name != "") and pillar is None:
-            return render_template("/create-event.html", error="Please enter a valid Pillar name")
+        # create new event
+        if event_id is None or event_id == "":
+            if name is None or name == "":
+                return render_template("/modify-event.html", option_list=option_list, error="Please enter an event name")
+            elif date is None or date == "":
+                return render_template("/modify-event.html", option_list=option_list, error="Please enter a date")
+            elif (pillar_name != "") and pillar is None:
+                return render_template("/modify-event.html", option_list=option_list, error="Please enter a valid Pillar name")
 
-        pillar_id = pillar.id if pillar != None else None
-        date_object = datetime.strptime(date, '%Y-%m-%dT%H:%M')
+            pillar_id = pillar.id if pillar != None else None
+            date_object = datetime.strptime(date, '%Y-%m-%dT%H:%M')
 
-        event_object = models.Event(name=name, pillar=pillar_id,
-                                    date=date_object, description=description, link=link)
-        db.session.add(event_object)
-        db.session.commit()
-        all_the_events = db.session.query(models.Event).all()
+            event_object = models.Event(name=name, pillar=pillar_id,
+                                        date=date_object, description=description, link=link)
+            db.session.add(event_object)
+            db.session.commit()
+            # all_the_events = db.session.query(models.Event).all()
 
-        return render_template("/create-event.html", error="Event Created")
+            return render_template("/modify-event.html", option_list=models.Event.query.all(), error="Event Created")
+        # modify or delete event
+        else:
+            if delete:
+                db.session.query(models.Event).filter_by(id=event_id).delete()
+                db.session.commit()
+                return render_template("/modify-event.html", option_list=models.Event.query.all(),  error="Event Deleted")
+            else:
+
+                # pillar check:
+                pillar = db.session.query(models.Pillar).filter_by(
+                    name=pillar_name).first()
+                if (pillar_name != "") and pillar is None:
+                    return render_template("/modify-event.html", option_list=option_list, error="Please enter a valid Pillar name")
+                pillar_id = pillar.id if pillar != None else None
+
+                date_object = datetime.strptime(date, '%Y-%m-%dT%H:%M')
+                e_obj = db.session.query(
+                    models.Event).filter_by(id=event_id).first()
+                e_obj.name = name
+                e_obj.pillar = pillar_id
+                e_obj.date = date_object
+                e_obj.description = description
+                e_obj.link = link
+                db.session.commit()
+                return render_template("/modify-event.html", option_list=models.Event.query.all(), error="Event Updated")
+
+         return render_template("/modify-event.html", option_list=models.Event.query.all(), error="Unknown Error")
     return "Method Not Allowed"
 
 

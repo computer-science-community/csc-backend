@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+* {box-sizing: border-box;}
+
+input[type=text], select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  margin-bottom: 16px;
+  resize: vertical;
+}
+
+input[type=submit] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+.container {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+</style>
+</head>
+<body>
+
+    <script>
+        function populate_form() {
+            const e = document.getElementById("event_list");
+            if (e.value == "new event") {
+              document.getElementById("event_id").value = "";
+              document.getElementById("pillar").value = "";
+              document.getElementById("name").value = "";
+              document.getElementById("date").value = "";
+              document.getElementById("description").value = "";
+              document.getElementById("link").value = "";
+            }
+            else if (e) {
+                event_id = document.getElementById("event_id").value = e.value;
+                $(document).ready(function(){
+                    $.ajax({
+                        url: '/gather_event_info',
+                        type: 'POST',
+                        data: { 'event_id': event_id },
+                        success: function(data){
+                            document.getElementById("event_id").value = data[0];
+                            document.getElementById("pillar").value = data[1];
+                            document.getElementById("name").value = data[2];
+                            let sd = data[3].split(" ")
+                            let month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            document.getElementById("date").value = (sd[3] + '-' + String(month.indexOf(sd[2]) + 1).padStart(2, '0') + '-' + sd[1] + 'T' + sd[4].substring(0, sd[4].length - 3));
+                            document.getElementById("description").value = data[4];
+                            document.getElementById("link").value = data[5];
+                        }
+                    });
+                });
+            }
+
+        }
+
+    </script>
+
+<h3>Events</h3>
+
+<div class="container">
+  <form action="/event-form" method="POST" name="readonly-form">
+    {{error}}
+    <div class="form-group">
+      <select type="select" id="event_list" name="event_list" onchange="populate_form()">
+        <option> new event</option>
+        {% for o in option_list %}
+            <option id="obj" value="{{ o.id }}">{{ o.name, o.date.strftime("%m/%d/%Y, %H:%M:%S") }}</option>
+        {% endfor %}
+      </select>
+      <label for="event_id">Event Id</label>
+      <input type="text" id="event_id" name="event_id" placeholder="No Id Yet" readonly>
+
+      <label for="pillar">Pillar:</label>
+      <input type="text" id="pillar" name="pillar" placeholder="ex: Exam Review">
+
+      <label for="name">Event Name:</label>
+      <input type="text" id="name" name="name" placeholder="ex: CS1 Midterm Review">
+
+      <label for="date">Date:</label>
+      <input type="datetime-local" id="date" name="date">
+
+    </br>
+    </br>
+
+      <label for="description">Description</label>
+      <textarea id="description" name="description" style="height:100px" placeholder="ex: Midterm Review in Atrium. Free pizza will be provided"></textarea>
+
+      <label for="link">Campus Groups link:</label>
+      <input type="text" id="link" name="link" placeholder="Create event on campus groups to recieve link">
+
+      <input type="checkbox" id="delete" name="delete" value="delete">Delete</input>
+      <br></br>
+
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
+</body>
+</html>
